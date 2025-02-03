@@ -46,18 +46,15 @@ const Services = () => {
 
   const isAdmin = userProfile?.role === 'admin';
 
-  // Updated query to properly handle the join
+  // Fixed query to properly handle the join using the foreign key relationship
   const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
         .select(`
-          id,
-          name,
-          price,
-          category_id,
-          categories:category_id (
+          *,
+          categories (
             id,
             name
           )
