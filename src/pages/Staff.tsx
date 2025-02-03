@@ -72,27 +72,18 @@ const Staff = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Not authenticated');
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-staff`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'add',
-            ...values,
-          }),
-        }
-      );
+      const response = await supabase.functions.invoke('manage-staff', {
+        body: {
+          action: 'add',
+          ...values,
+        },
+      });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to add staff member');
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to add staff member');
       }
 
-      return response.json();
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
@@ -116,27 +107,18 @@ const Staff = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error('Not authenticated');
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-staff`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'remove',
-            userId,
-          }),
-        }
-      );
+      const response = await supabase.functions.invoke('manage-staff', {
+        body: {
+          action: 'remove',
+          userId,
+        },
+      });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to remove staff member');
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to remove staff member');
       }
 
-      return response.json();
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
