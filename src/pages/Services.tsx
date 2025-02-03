@@ -46,13 +46,13 @@ const Services = () => {
 
   const isAdmin = userProfile?.role === 'admin';
 
-  // Fixed query to properly handle the join using the foreign key relationship
+  // Updated query to use the correct join syntax
   const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
-        .select('*, category:category_id(id, name)');
+        .select('*, categories!services_category_id_fkey(id, name)');
       if (error) throw error;
       return data;
     },
@@ -147,7 +147,7 @@ const Services = () => {
 
   // Group services by category
   const servicesByCategory = services?.reduce((acc, service) => {
-    const categoryName = service.category?.name || 'Uncategorized';
+    const categoryName = service.categories?.name || 'Uncategorized';
     if (!acc[categoryName]) {
       acc[categoryName] = [];
     }
