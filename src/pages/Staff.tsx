@@ -69,30 +69,30 @@ const Staff = () => {
 
   const addStaffMutation = useMutation({
     mutationFn: async (values: z.infer<typeof addStaffSchema>) => {
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: values.email,
-        password: 'temppass123', // You might want to generate this randomly
-        email_confirm: true
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Not authenticated');
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('Failed to create user');
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-staff`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'add',
+            ...values,
+          }),
+        }
+      );
 
-      // Then create the profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: authData.user.id,
-          email: values.email,
-          full_name: values.full_name,
-          role: 'staff'
-        })
-        .select()
-        .single();
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to add staff member');
+      }
 
-      if (profileError) throw profileError;
-      return profileData;
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
@@ -112,10 +112,31 @@ const Staff = () => {
   });
 
   const removeStaffMutation = useMutation({
-    mutationFn: async (staffId: string) => {
-      // This will cascade delete the profile due to our foreign key constraint
-      const { error } = await supabase.auth.admin.deleteUser(staffId);
-      if (error) throw error;
+    mutationFn: async (userId: string) => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('Not authenticated');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-staff`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'remove',
+            userId,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to remove staff member');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
