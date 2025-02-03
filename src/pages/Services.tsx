@@ -46,16 +46,20 @@ const Services = () => {
 
   const isAdmin = userProfile?.role === 'admin';
 
+  // Updated query to properly handle the join
   const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
         .select(`
-          *,
-          categories (
-            name,
-            id
+          id,
+          name,
+          price,
+          category_id,
+          categories:category_id (
+            id,
+            name
           )
         `);
       if (error) throw error;
