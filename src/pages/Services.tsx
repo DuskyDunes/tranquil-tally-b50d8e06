@@ -52,13 +52,7 @@ const Services = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
-        .select(`
-          *,
-          categories (
-            id,
-            name
-          )
-        `);
+        .select('*, category:category_id(id, name)');
       if (error) throw error;
       return data;
     },
@@ -153,7 +147,7 @@ const Services = () => {
 
   // Group services by category
   const servicesByCategory = services?.reduce((acc, service) => {
-    const categoryName = service.categories?.name || 'Uncategorized';
+    const categoryName = service.category?.name || 'Uncategorized';
     if (!acc[categoryName]) {
       acc[categoryName] = [];
     }
