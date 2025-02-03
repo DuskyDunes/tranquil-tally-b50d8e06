@@ -69,22 +69,36 @@ const Staff = () => {
 
   const addStaffMutation = useMutation({
     mutationFn: async (values: z.infer<typeof addStaffSchema>) => {
-      const { data, error } = await supabase
+      // First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: values.email,
+        password: 'temppass123', // You might want to generate this randomly
+        email_confirm: true
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('Failed to create user');
+
+      // Then create the profile
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .insert([
-          { ...values, role: 'staff' }
-        ])
+        .insert({
+          id: authData.user.id,
+          email: values.email,
+          full_name: values.full_name,
+          role: 'staff'
+        })
         .select()
         .single();
 
-      if (error) throw error;
-      return data;
+      if (profileError) throw profileError;
+      return profileData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
       toast({
         title: "Success",
-        description: "Staff member added successfully",
+        description: "Staff member added successfully. They will receive an email to set their password.",
       });
       form.reset();
     },
@@ -99,11 +113,8 @@ const Staff = () => {
 
   const removeStaffMutation = useMutation({
     mutationFn: async (staffId: string) => {
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', staffId);
-
+      // This will cascade delete the profile due to our foreign key constraint
+      const { error } = await supabase.auth.admin.deleteUser(staffId);
       if (error) throw error;
     },
     onSuccess: () => {
