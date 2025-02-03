@@ -1,7 +1,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, Outlet } from 'react-router-dom';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
-import { Home, DollarSign, Calendar, Users, Settings, LogOut } from 'lucide-react';
+import { Home, DollarSign, Calendar, Users, Settings, LogOut, Receipt } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Layout = () => {
@@ -20,6 +20,7 @@ const Layout = () => {
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: DollarSign, label: 'New Sale', path: '/new-sale' },
+    { icon: Receipt, label: 'Transactions', path: '/transactions' },
     { icon: Calendar, label: 'Services', path: '/services' },
     { icon: Users, label: 'Staff', path: '/staff' },
     { icon: Settings, label: 'Settings', path: '/settings' },

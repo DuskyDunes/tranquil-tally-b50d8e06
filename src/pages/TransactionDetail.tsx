@@ -1,9 +1,10 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const TransactionDetail = () => {
   const { id } = useParams();
@@ -27,7 +28,7 @@ const TransactionDetail = () => {
           )
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -43,50 +44,104 @@ const TransactionDetail = () => {
   }
 
   if (!transaction) {
-    return <div>Transaction not found</div>;
+    return (
+      <div className="p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold">Transaction not found</h2>
+          <Link to="/transactions" className="text-primary hover:underline mt-4 block">
+            Back to Transactions
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 animate-fadeIn">
+      <div className="mb-6">
+        <Link to="/transactions">
+          <Button variant="ghost" className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Transactions
+          </Button>
+        </Link>
+      </div>
+
       <h1 className="text-3xl font-semibold mb-8">Transaction Details</h1>
       
-      <Card className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="text-lg font-semibold">{transaction.customer_name}</h3>
-            <p className="text-sm text-gray-500">{transaction.customer_mobile}</p>
-            <p className="text-sm text-gray-500">
-              {format(new Date(transaction.created_at), 'PPpp')}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-lg font-bold">${transaction.total_amount}</p>
-            <p className="text-sm text-gray-500">Tips: ${transaction.total_tips}</p>
-          </div>
-        </div>
-
-        <div className="border-t pt-4">
-          <h4 className="font-medium mb-2">Services</h4>
-          <div className="space-y-2">
-            {transaction.transaction_items?.map((item: any) => (
-              <div key={item.id} className="flex justify-between items-center">
-                <div>
-                  <p>{item.services?.name}</p>
-                  <p className="text-sm text-gray-500">
-                    Staff: {item.profiles?.full_name || item.profiles?.email}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p>${item.price}</p>
-                  {item.tip > 0 && (
-                    <p className="text-sm text-gray-500">Tip: ${item.tip}</p>
-                  )}
-                </div>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              <div className="flex justify-between">
+                <span className="font-medium">Customer Name:</span>
+                <span>{transaction.customer_name}</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </Card>
+              <div className="flex justify-between">
+                <span className="font-medium">Mobile Number:</span>
+                <span>{transaction.customer_mobile}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Transaction Date:</span>
+                <span>{format(new Date(transaction.created_at), 'PPpp')}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Services</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {transaction.transaction_items?.map((item: any) => (
+                <div key={item.id} className="border-b pb-4 last:border-0">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium">{item.services?.name}</p>
+                      <p className="text-sm text-gray-500">
+                        Staff: {item.profiles?.full_name || item.profiles?.email}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold">${item.price}</p>
+                      {item.tip > 0 && (
+                        <p className="text-sm text-gray-500">Tip: ${item.tip}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between text-lg">
+                <span>Subtotal:</span>
+                <span>${transaction.total_amount - transaction.total_tips}</span>
+              </div>
+              <div className="flex justify-between text-lg">
+                <span>Total Tips:</span>
+                <span>${transaction.total_tips}</span>
+              </div>
+              <div className="flex justify-between text-lg font-bold border-t pt-2">
+                <span>Total Amount:</span>
+                <span>${transaction.total_amount}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
