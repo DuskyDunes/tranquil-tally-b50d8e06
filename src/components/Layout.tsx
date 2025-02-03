@@ -34,7 +34,7 @@ const Layout = () => {
             <SidebarGroup>
               <div className="px-4 py-6">
                 <h1 className="text-2xl font-semibold text-primary">De Style Mens Saloon</h1>
-                <h2 className="text-2xl font-semibold text-primary">Welcome!</h2>
+                
               </div>
               <SidebarGroupContent>
                 {menuItems.map((item) => (
