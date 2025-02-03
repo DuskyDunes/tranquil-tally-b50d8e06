@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const Services = () => {
   const { data: services, isLoading } = useQuery({
@@ -35,19 +35,25 @@ const Services = () => {
     <div className="p-6">
       <h1 className="text-3xl font-semibold mb-8">Services</h1>
       
-      {Object.entries(servicesByCategory || {}).map(([category, services]) => (
-        <div key={category} className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">{category}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {services?.map((service) => (
-              <Card key={service.id} className="p-6">
-                <h3 className="text-lg font-semibold">{service.name}</h3>
-                <p className="text-lg font-bold mt-2">${service.price}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      ))}
+      <div className="space-y-6">
+        {Object.entries(servicesByCategory || {}).map(([category, services]) => (
+          <Card key={category} className="w-full">
+            <CardHeader>
+              <CardTitle>{category}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                {services?.map((service) => (
+                  <div key={service.id} className="flex items-center justify-between">
+                    <span className="text-lg">{service.name}</span>
+                    <span className="text-lg font-bold hidden">${service.price}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

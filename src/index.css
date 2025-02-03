@@ -62,6 +62,11 @@
   }
 }
 
+/* Add styles for dropdown components */
+[data-radix-popper-content-wrapper] {
+  @apply bg-white dark:bg-gray-800 !important;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out forwards;
 }
