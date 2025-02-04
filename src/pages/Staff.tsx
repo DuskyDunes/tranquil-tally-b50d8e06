@@ -1,27 +1,9 @@
-import { Card } from "@/components/ui/card";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, UserPlus, UserMinus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useToast } from "@/hooks/use-toast";
-
-interface StaffMember {
-  id: string;
-  full_name: string | null;
-  email: string;
-  role: string;
-}
-
-const addStaffSchema = z.object({
-  email: z.string().email(),
-  full_name: z.string().min(1, "Full name is required"),
-});
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { StaffCard } from "@/components/staff/StaffCard";
+import { AddStaffDialog } from "@/components/staff/AddStaffDialog";
 
 const Staff = () => {
   const { toast } = useToast();
@@ -51,27 +33,13 @@ const Staff = () => {
         .select('*')
         .eq('role', 'staff');
       
-      if (error) {
-        console.error('Error fetching staff:', error);
-        throw error;
-      }
-      return data as StaffMember[];
-    },
-  });
-
-  const form = useForm({
-    resolver: zodResolver(addStaffSchema),
-    defaultValues: {
-      email: "",
-      full_name: "",
+      if (error) throw error;
+      return data;
     },
   });
 
   const addStaffMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof addStaffSchema>) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Not authenticated');
-
+    mutationFn: async (values: any) => {
       const response = await supabase.functions.invoke('manage-staff', {
         body: {
           action: 'add',
@@ -91,9 +59,8 @@ const Staff = () => {
         title: "Success",
         description: "Staff member added successfully. They will receive an email to set their password.",
       });
-      form.reset();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: "Failed to add staff member: " + error.message,
@@ -104,9 +71,6 @@ const Staff = () => {
 
   const removeStaffMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) throw new Error('Not authenticated');
-
       const response = await supabase.functions.invoke('manage-staff', {
         body: {
           action: 'remove',
@@ -127,7 +91,7 @@ const Staff = () => {
         description: "Staff member removed successfully",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: "Failed to remove staff member: " + error.message,
@@ -136,9 +100,30 @@ const Staff = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof addStaffSchema>) => {
-    addStaffMutation.mutate(values);
-  };
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ userId, status }: { userId: string; status: string }) => {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ approval_status: status })
+        .eq('id', userId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['staff'] });
+      toast({
+        title: "Success",
+        description: "Staff member status updated successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update staff member status: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   if (isLoading) {
     return (
@@ -154,81 +139,19 @@ const Staff = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-semibold">Staff Members</h1>
-        {isAdmin && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>
-                <UserPlus className="mr-2" />
-                Add Staff
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Staff Member</DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="full_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Full Name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full">
-                    Add Staff Member
-                  </Button>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        )}
+        {isAdmin && <AddStaffDialog onSubmit={addStaffMutation.mutate} />}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {staffMembers?.map((staff) => (
-          <Card key={staff.id} className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-semibold">
-                  {staff.full_name || 'No name set'}
-                </h3>
-                <p className="text-sm text-gray-500">{staff.email}</p>
-                <p className="text-sm text-gray-500 mt-2 capitalize">{staff.role}</p>
-              </div>
-              {isAdmin && (
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to remove this staff member?')) {
-                      removeStaffMutation.mutate(staff.id);
-                    }
-                  }}
-                >
-                  <UserMinus className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </Card>
+          <StaffCard
+            key={staff.id}
+            staff={staff}
+            isAdmin={isAdmin}
+            onRemove={removeStaffMutation.mutate}
+            onUpdateStatus={(id, status) => 
+              updateStatusMutation.mutate({ userId: id, status })
+            }
+          />
         ))}
         {staffMembers?.length === 0 && (
           <p className="text-gray-500 col-span-3 text-center py-8">
