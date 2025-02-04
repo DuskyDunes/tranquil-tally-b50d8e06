@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { StaffCard } from "@/components/staff/StaffCard";
 import { AddStaffDialog } from "@/components/staff/AddStaffDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Staff = () => {
   const { toast } = useToast();
@@ -31,7 +32,8 @@ const Staff = () => {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'staff');
+        .eq('role', 'staff')
+        .order('approval_status', { ascending: false });
       
       if (error) throw error;
       return data;
@@ -134,6 +136,8 @@ const Staff = () => {
   }
 
   const isAdmin = currentUser?.role === 'admin';
+  const pendingStaff = staffMembers?.filter(staff => staff.approval_status === 'pending') || [];
+  const approvedStaff = staffMembers?.filter(staff => staff.approval_status === 'approved') || [];
 
   return (
     <div className="p-6">
@@ -141,24 +145,68 @@ const Staff = () => {
         <h1 className="text-3xl font-semibold">Staff Members</h1>
         {isAdmin && <AddStaffDialog onSubmit={addStaffMutation.mutate} />}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {staffMembers?.map((staff) => (
-          <StaffCard
-            key={staff.id}
-            staff={staff}
-            isAdmin={isAdmin}
-            onRemove={removeStaffMutation.mutate}
-            onUpdateStatus={(id, status) => 
-              updateStatusMutation.mutate({ userId: id, status })
-            }
-          />
-        ))}
-        {staffMembers?.length === 0 && (
-          <p className="text-gray-500 col-span-3 text-center py-8">
-            No staff members found.
-          </p>
+
+      <Tabs defaultValue="approved" className="w-full">
+        <TabsList>
+          <TabsTrigger value="approved">
+            Approved Staff
+          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="pending" className="relative">
+              Pending Approvals
+              {pendingStaff.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {pendingStaff.length}
+                </span>
+              )}
+            </TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="approved" className="mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {approvedStaff.map((staff) => (
+              <StaffCard
+                key={staff.id}
+                staff={staff}
+                isAdmin={isAdmin}
+                onRemove={removeStaffMutation.mutate}
+                onUpdateStatus={(id, status) => 
+                  updateStatusMutation.mutate({ userId: id, status })
+                }
+              />
+            ))}
+            {approvedStaff.length === 0 && (
+              <p className="text-gray-500 col-span-3 text-center py-8">
+                No approved staff members found.
+              </p>
+            )}
+          </div>
+        </TabsContent>
+
+        {isAdmin && (
+          <TabsContent value="pending" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {pendingStaff.map((staff) => (
+                <StaffCard
+                  key={staff.id}
+                  staff={staff}
+                  isAdmin={isAdmin}
+                  onRemove={removeStaffMutation.mutate}
+                  onUpdateStatus={(id, status) => 
+                    updateStatusMutation.mutate({ userId: id, status })
+                  }
+                />
+              ))}
+              {pendingStaff.length === 0 && (
+                <p className="text-gray-500 col-span-3 text-center py-8">
+                  No pending approval requests.
+                </p>
+              )}
+            </div>
+          </TabsContent>
         )}
-      </div>
+      </Tabs>
     </div>
   );
 };
