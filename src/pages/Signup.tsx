@@ -16,6 +16,8 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return; // Prevent multiple submissions
+    
     setIsLoading(true);
     
     try {
@@ -56,7 +58,7 @@ const Signup = () => {
         description: error instanceof Error ? error.message : "Failed to create account",
       });
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Always reset loading state
     }
   };
 

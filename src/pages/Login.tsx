@@ -19,6 +19,8 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return; // Prevent multiple submissions
+    
     setIsLoading(true);
     setIsPendingApproval(false);
     
@@ -40,8 +42,7 @@ const Login = () => {
           description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
         });
       }
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Reset loading state on error
     }
   };
 

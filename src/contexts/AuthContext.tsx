@@ -20,27 +20,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check active session
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('approval_status')
-          .eq('id', session.user.id)
-          .single();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('approval_status')
+            .eq('id', session.user.id)
+            .single();
 
-        if (profile?.approval_status !== 'approved') {
-          await supabase.auth.signOut();
-          setUser(null);
-          toast({
-            variant: "destructive",
-            title: "Access Denied",
-            description: "Your account is pending approval. Please wait for an admin to approve your account.",
-          });
-        } else {
-          setUser(session.user);
+          if (profile?.approval_status !== 'approved') {
+            await supabase.auth.signOut();
+            setUser(null);
+            toast({
+              variant: "destructive",
+              title: "Access Denied",
+              description: "Your account is pending approval. Please wait for an admin to approve your account.",
+            });
+          } else {
+            setUser(session.user);
+          }
         }
+      } catch (error) {
+        console.error('Session check error:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkSession();
@@ -49,28 +54,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('approval_status')
-          .eq('id', session.user.id)
-          .single();
+      try {
+        if (session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('approval_status')
+            .eq('id', session.user.id)
+            .single();
 
-        if (profile?.approval_status !== 'approved') {
-          await supabase.auth.signOut();
-          setUser(null);
-          toast({
-            variant: "destructive",
-            title: "Access Denied",
-            description: "Your account is pending approval. Please wait for an admin to approve your account.",
-          });
+          if (profile?.approval_status !== 'approved') {
+            await supabase.auth.signOut();
+            setUser(null);
+            toast({
+              variant: "destructive",
+              title: "Access Denied",
+              description: "Your account is pending approval. Please wait for an admin to approve your account.",
+            });
+          } else {
+            setUser(session.user);
+          }
         } else {
-          setUser(session.user);
+          setUser(null);
         }
-      } else {
+      } catch (error) {
+        console.error('Auth state change error:', error);
         setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
