@@ -46,7 +46,6 @@ const Services = () => {
 
   const isAdmin = userProfile?.role === 'admin';
 
-  // Updated query to use the correct join syntax
   const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
@@ -97,7 +96,11 @@ const Services = () => {
     mutationFn: async (service: any) => {
       const { error } = await supabase
         .from('services')
-        .update(service)
+        .update({
+          name: service.name,
+          price: service.price,
+          category_id: service.category_id
+        })
         .eq('id', service.id);
       if (error) throw error;
     },
@@ -156,18 +159,18 @@ const Services = () => {
   }, {} as Record<string, typeof services>);
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-semibold">Services</h1>
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
+        <h1 className="text-2xl md:text-3xl font-semibold">Services</h1>
         {isAdmin && (
           <Dialog>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full md:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Service
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Add New Service</DialogTitle>
               </DialogHeader>
@@ -208,6 +211,7 @@ const Services = () => {
                 <Button
                   onClick={() => addServiceMutation.mutate(newService)}
                   disabled={!newService.name || !newService.price || !newService.category_id}
+                  className="w-full"
                 >
                   Add Service
                 </Button>
@@ -217,7 +221,7 @@ const Services = () => {
         )}
       </div>
       
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {Object.entries(servicesByCategory || {}).map(([category, services]) => (
           <Card key={category} className="w-full">
             <CardHeader>
@@ -226,19 +230,19 @@ const Services = () => {
             <CardContent>
               <div className="grid gap-4">
                 {services?.map((service) => (
-                  <div key={service.id} className="flex items-center justify-between">
+                  <div key={service.id} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-4">
                     <span className="text-lg">{service.name}</span>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 w-full md:w-auto">
                       <span className="text-lg font-bold">${service.price}</span>
                       {isAdmin && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 w-full md:w-auto">
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button variant="outline" size="icon">
+                              <Button variant="outline" size="icon" className="h-8 w-8">
                                 <Pencil className="h-4 w-4" />
                               </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="sm:max-w-[425px]">
                               <DialogHeader>
                                 <DialogTitle>Edit Service</DialogTitle>
                               </DialogHeader>
@@ -276,7 +280,16 @@ const Services = () => {
                                   </select>
                                 </div>
                                 <Button
-                                  onClick={() => updateServiceMutation.mutate(editingService || service)}
+                                  onClick={() => {
+                                    const updatedService = editingService || {
+                                      ...service,
+                                      name: service.name,
+                                      price: service.price,
+                                      category_id: service.category_id
+                                    };
+                                    updateServiceMutation.mutate(updatedService);
+                                  }}
+                                  className="w-full"
                                 >
                                   Update Service
                                 </Button>
@@ -286,6 +299,7 @@ const Services = () => {
                           <Button
                             variant="outline"
                             size="icon"
+                            className="h-8 w-8"
                             onClick={() => {
                               if (window.confirm('Are you sure you want to delete this service?')) {
                                 deleteServiceMutation.mutate(service.id);
