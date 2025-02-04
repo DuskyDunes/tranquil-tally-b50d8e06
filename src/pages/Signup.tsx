@@ -35,7 +35,8 @@ const Signup = () => {
               id: authData.user.id,
               email: email,
               full_name: fullName,
-              role: 'staff', // Default role
+              role: 'staff',
+              approval_status: 'pending'
             }
           ]);
 
@@ -43,7 +44,7 @@ const Signup = () => {
 
         toast({
           title: "Success",
-          description: "Account created successfully! Please check your email for verification.",
+          description: "Account created successfully! Please wait for admin approval before logging in.",
         });
         navigate('/login');
       }

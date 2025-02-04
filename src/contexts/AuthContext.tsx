@@ -19,7 +19,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check active session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -40,7 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
       setIsLoading(false);
-    });
+    };
+
+    checkSession();
 
     // Listen for auth changes
     const {
@@ -74,30 +77,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [toast]);
 
   const login = async (email: string, password: string) => {
-    const { data: { user: authUser }, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (signInError) throw signInError;
+    try {
+      const { data: { user: authUser }, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (signInError) throw signInError;
 
-    if (authUser) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('approval_status')
-        .eq('id', authUser.id)
-        .single();
+      if (authUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('approval_status')
+          .eq('id', authUser.id)
+          .single();
 
-      if (profile?.approval_status !== 'approved') {
-        await supabase.auth.signOut();
-        throw new Error('Your account is pending approval. Please wait for an admin to approve your account.');
+        if (profile?.approval_status !== 'approved') {
+          await supabase.auth.signOut();
+          throw new Error('Your account is pending approval. Please wait for an admin to approve your account.');
+        }
       }
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   };
 
   const value = {
