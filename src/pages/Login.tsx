@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,11 +20,11 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return; // Prevent multiple submissions
-    
+    if (isLoading) return;
+
     setIsLoading(true);
     setIsPendingApproval(false);
-    
+
     try {
       await login(email, password);
       navigate('/');
@@ -42,7 +43,8 @@ const Login = () => {
           description: error instanceof Error ? error.message : "Invalid email or password. Please try again.",
         });
       }
-      setIsLoading(false); // Reset loading state on error
+    } finally {
+      setIsLoading(false);
     }
   };
 

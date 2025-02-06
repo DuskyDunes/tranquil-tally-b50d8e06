@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -18,73 +19,87 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+
     // Check active session
     const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+
         if (session?.user) {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('approval_status')
             .eq('id', session.user.id)
-            .single();
+            .maybeSingle();
+
+          if (profileError) throw profileError;
 
           if (profile?.approval_status !== 'approved') {
             await supabase.auth.signOut();
-            setUser(null);
-            toast({
-              variant: "destructive",
-              title: "Access Denied",
-              description: "Your account is pending approval. Please wait for an admin to approve your account.",
-            });
-          } else {
+            if (mounted) {
+              setUser(null);
+              toast({
+                variant: "destructive",
+                title: "Access Denied",
+                description: "Your account is pending approval. Please wait for an admin to approve your account.",
+              });
+            }
+          } else if (mounted) {
             setUser(session.user);
           }
         }
       } catch (error) {
         console.error('Session check error:', error);
+        if (mounted) setUser(null);
       } finally {
-        setIsLoading(false);
+        if (mounted) setIsLoading(false);
       }
     };
 
     checkSession();
 
     // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       try {
         if (session?.user) {
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('approval_status')
             .eq('id', session.user.id)
-            .single();
+            .maybeSingle();
+
+          if (profileError) throw profileError;
 
           if (profile?.approval_status !== 'approved') {
             await supabase.auth.signOut();
-            setUser(null);
-            toast({
-              variant: "destructive",
-              title: "Access Denied",
-              description: "Your account is pending approval. Please wait for an admin to approve your account.",
-            });
-          } else {
+            if (mounted) {
+              setUser(null);
+              toast({
+                variant: "destructive",
+                title: "Access Denied",
+                description: "Your account is pending approval. Please wait for an admin to approve your account.",
+              });
+            }
+          } else if (mounted) {
             setUser(session.user);
           }
-        } else {
+        } else if (mounted) {
           setUser(null);
         }
       } catch (error) {
         console.error('Auth state change error:', error);
-        setUser(null);
+        if (mounted) setUser(null);
       } finally {
-        setIsLoading(false);
+        if (mounted) setIsLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [toast]);
 
   const login = async (email: string, password: string) => {
@@ -93,15 +108,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
       });
-      
+
       if (signInError) throw signInError;
 
       if (authUser) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('approval_status')
           .eq('id', authUser.id)
-          .single();
+          .maybeSingle();
+
+        if (profileError) throw profileError;
 
         if (profile?.approval_status !== 'approved') {
           await supabase.auth.signOut();
