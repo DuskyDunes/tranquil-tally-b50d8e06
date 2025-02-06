@@ -21,7 +21,7 @@ const Staff = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error fetching current user profile:', error);
@@ -120,7 +120,9 @@ const Staff = () => {
       const { data, error } = await supabase
         .from('profiles')
         .update({ approval_status: status })
-        .eq('id', userId);
+        .eq('id', userId)
+        .select()
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating status:', error);
