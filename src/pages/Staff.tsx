@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -16,26 +17,37 @@ const Staff = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
       
+      if (error) {
+        console.error('Error fetching current user profile:', error);
+        return null;
+      }
+      
       return profile;
     },
   });
 
-  const { data: staffMembers, isLoading } = useQuery({
+  const { data: staffMembers, isLoading, error } = useQuery({
     queryKey: ['staff'],
     queryFn: async () => {
+      console.log('Fetching staff members...');
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('role', 'staff')
-        .order('approval_status', { ascending: false });
+        .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching staff members:', error);
+        throw error;
+      }
+      
+      console.log('Staff members fetched:', data);
       return data;
     },
   });
@@ -104,12 +116,18 @@ const Staff = () => {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ userId, status }: { userId: string; status: string }) => {
-      const { error } = await supabase
+      console.log('Updating status:', { userId, status });
+      const { data, error } = await supabase
         .from('profiles')
         .update({ approval_status: status })
         .eq('id', userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating status:', error);
+        throw error;
+      }
+      
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['staff'] });
@@ -119,6 +137,7 @@ const Staff = () => {
       });
     },
     onError: (error: Error) => {
+      console.error('Update status error:', error);
       toast({
         title: "Error",
         description: "Failed to update staff member status: " + error.message,
@@ -126,6 +145,15 @@ const Staff = () => {
       });
     },
   });
+
+  if (error) {
+    console.error('Staff page error:', error);
+    return (
+      <div className="p-6 text-red-500">
+        Error loading staff members. Please try again later.
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
