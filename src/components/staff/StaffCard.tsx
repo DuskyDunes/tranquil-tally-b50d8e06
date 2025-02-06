@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserMinus } from "lucide-react";
@@ -18,13 +19,13 @@ interface StaffCardProps {
 
 export const StaffCard = ({ staff, isAdmin, onRemove, onUpdateStatus }: StaffCardProps) => {
   return (
-    <Card className="p-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="text-lg font-semibold">
+    <Card className="p-4 md:p-6">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold truncate">
             {staff.full_name || 'No name set'}
           </h3>
-          <p className="text-sm text-gray-500">{staff.email}</p>
+          <p className="text-sm text-gray-500 truncate">{staff.email}</p>
           <p className="text-sm text-gray-500 mt-2 capitalize">{staff.role}</p>
           <div className="mt-2">
             <Badge 
@@ -35,7 +36,7 @@ export const StaffCard = ({ staff, isAdmin, onRemove, onUpdateStatus }: StaffCar
             </Badge>
           </div>
           {isAdmin && staff.approval_status === 'pending' && (
-            <div className="mt-2 space-x-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Button 
                 size="sm" 
                 onClick={() => onUpdateStatus(staff.id, 'approved')}
@@ -56,6 +57,7 @@ export const StaffCard = ({ staff, isAdmin, onRemove, onUpdateStatus }: StaffCar
           <Button
             variant="destructive"
             size="icon"
+            className="shrink-0"
             onClick={() => {
               if (window.confirm('Are you sure you want to remove this staff member?')) {
                 onRemove(staff.id);

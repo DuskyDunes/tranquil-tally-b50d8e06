@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -6,10 +5,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { StaffCard } from "@/components/staff/StaffCard";
 import { AddStaffDialog } from "@/components/staff/AddStaffDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Staff = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -149,9 +150,8 @@ const Staff = () => {
   });
 
   if (error) {
-    console.error('Staff page error:', error);
     return (
-      <div className="p-6 text-red-500">
+      <div className="p-4 md:p-6 text-red-500">
         Error loading staff members. Please try again later.
       </div>
     );
@@ -170,20 +170,20 @@ const Staff = () => {
   const approvedStaff = staffMembers?.filter(staff => staff.approval_status === 'approved') || [];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-semibold">Staff Members</h1>
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-semibold">Staff Members</h1>
         {isAdmin && <AddStaffDialog onSubmit={addStaffMutation.mutate} />}
       </div>
 
       <Tabs defaultValue="approved" className="w-full">
-        <TabsList>
-          <TabsTrigger value="approved">
+        <TabsList className="w-full md:w-auto grid grid-cols-2 md:flex">
+          <TabsTrigger value="approved" className="flex-1 md:flex-none">
             Approved Staff
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="pending" className="relative">
-              Pending Approvals
+            <TabsTrigger value="pending" className="relative flex-1 md:flex-none">
+              {isMobile ? 'Pending' : 'Pending Approvals'}
               {pendingStaff.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                   {pendingStaff.length}
@@ -193,8 +193,8 @@ const Staff = () => {
           )}
         </TabsList>
 
-        <TabsContent value="approved" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <TabsContent value="approved" className="mt-4 md:mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {approvedStaff.map((staff) => (
               <StaffCard
                 key={staff.id}
@@ -207,7 +207,7 @@ const Staff = () => {
               />
             ))}
             {approvedStaff.length === 0 && (
-              <p className="text-gray-500 col-span-3 text-center py-8">
+              <p className="text-gray-500 col-span-full text-center py-8">
                 No approved staff members found.
               </p>
             )}
@@ -215,8 +215,8 @@ const Staff = () => {
         </TabsContent>
 
         {isAdmin && (
-          <TabsContent value="pending" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <TabsContent value="pending" className="mt-4 md:mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {pendingStaff.map((staff) => (
                 <StaffCard
                   key={staff.id}
@@ -229,7 +229,7 @@ const Staff = () => {
                 />
               ))}
               {pendingStaff.length === 0 && (
-                <p className="text-gray-500 col-span-3 text-center py-8">
+                <p className="text-gray-500 col-span-full text-center py-8">
                   No pending approval requests.
                 </p>
               )}
