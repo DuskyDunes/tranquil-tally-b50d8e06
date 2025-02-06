@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,20 +6,24 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [signupError, setSignupError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return; // Prevent multiple submissions
+    if (isLoading) return;
     
     setIsLoading(true);
+    setSignupError(null);
     
     try {
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
@@ -26,7 +31,13 @@ const Signup = () => {
         password,
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // Handle specific error cases
+        if (signUpError.message.includes('User already registered')) {
+          throw new Error('This email is already registered. Please try logging in instead.');
+        }
+        throw signUpError;
+      }
 
       if (authData.user) {
         // Create profile
@@ -52,13 +63,9 @@ const Signup = () => {
       }
     } catch (error) {
       console.error('Signup failed:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create account",
-      });
+      setSignupError(error instanceof Error ? error.message : "Failed to create account");
     } finally {
-      setIsLoading(false); // Always reset loading state
+      setIsLoading(false);
     }
   };
 
@@ -70,6 +77,14 @@ const Signup = () => {
             <h1 className="text-3xl font-semibold text-gray-800 mb-2">Create Account</h1>
             <p className="text-gray-600">Sign up to get started</p>
           </div>
+          {signupError && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {signupError}
+              </AlertDescription>
+            </Alert>
+          )}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Full Name</label>
@@ -80,6 +95,7 @@ const Signup = () => {
                 className="w-full p-3 border rounded-lg"
                 placeholder="Enter your full name"
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -91,6 +107,7 @@ const Signup = () => {
                 className="w-full p-3 border rounded-lg"
                 placeholder="Enter your email"
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -102,6 +119,7 @@ const Signup = () => {
                 className="w-full p-3 border rounded-lg"
                 placeholder="Create a password"
                 required
+                disabled={isLoading}
               />
             </div>
             <Button
