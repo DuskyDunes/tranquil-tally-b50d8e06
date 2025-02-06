@@ -27,6 +27,7 @@ const Login = () => {
 
     try {
       await login(email, password);
+      console.log('Login successful');
       navigate('/');
       toast({
         title: "Success",
@@ -74,6 +75,7 @@ const Login = () => {
                 className="w-full p-3 border rounded-lg"
                 placeholder="Enter your email"
                 required
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -85,6 +87,7 @@ const Login = () => {
                 className="w-full p-3 border rounded-lg"
                 placeholder="Enter your password"
                 required
+                disabled={isLoading}
               />
             </div>
             <Button
