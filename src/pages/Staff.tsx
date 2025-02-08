@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -151,7 +152,7 @@ const Staff = () => {
 
   if (error) {
     return (
-      <div className="p-4 md:p-6 text-red-500">
+      <div className="p-4 text-red-500">
         Error loading staff members. Please try again later.
       </div>
     );
@@ -170,19 +171,19 @@ const Staff = () => {
   const approvedStaff = staffMembers?.filter(staff => staff.approval_status === 'approved') || [];
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
-        <h1 className="text-2xl md:text-3xl font-semibold">Staff Members</h1>
+    <div className="p-4 max-w-[100vw] overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-2xl font-semibold">Staff Members</h1>
         {isAdmin && <AddStaffDialog onSubmit={addStaffMutation.mutate} />}
       </div>
 
       <Tabs defaultValue="approved" className="w-full">
-        <TabsList className="w-full md:w-auto grid grid-cols-2 md:flex">
-          <TabsTrigger value="approved" className="flex-1 md:flex-none">
-            Approved Staff
+        <TabsList className="w-full grid grid-cols-2 mb-4">
+          <TabsTrigger value="approved" className="flex-1">
+            {isMobile ? 'Approved' : 'Approved Staff'}
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="pending" className="relative flex-1 md:flex-none">
+            <TabsTrigger value="pending" className="relative flex-1">
               {isMobile ? 'Pending' : 'Pending Approvals'}
               {pendingStaff.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -193,8 +194,8 @@ const Staff = () => {
           )}
         </TabsList>
 
-        <TabsContent value="approved" className="mt-4 md:mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <TabsContent value="approved">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {approvedStaff.map((staff) => (
               <StaffCard
                 key={staff.id}
@@ -215,8 +216,8 @@ const Staff = () => {
         </TabsContent>
 
         {isAdmin && (
-          <TabsContent value="pending" className="mt-4 md:mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <TabsContent value="pending">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {pendingStaff.map((staff) => (
                 <StaffCard
                   key={staff.id}
