@@ -37,7 +37,7 @@ const TransactionDetail = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full">
+      <div className="flex justify-center items-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
@@ -45,7 +45,7 @@ const TransactionDetail = () => {
 
   if (!transaction) {
     return (
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="text-center">
           <h2 className="text-2xl font-semibold">Transaction not found</h2>
           <Link to="/transactions" className="text-primary hover:underline mt-4 block">
@@ -57,7 +57,7 @@ const TransactionDetail = () => {
   }
 
   return (
-    <div className="p-6 animate-fadeIn">
+    <div className="p-4 md:p-6 max-w-3xl mx-auto animate-fadeIn">
       <div className="mb-6">
         <Link to="/transactions">
           <Button variant="ghost" className="gap-2">
@@ -67,7 +67,7 @@ const TransactionDetail = () => {
         </Link>
       </div>
 
-      <h1 className="text-3xl font-semibold mb-8">Transaction Details</h1>
+      <h1 className="text-2xl md:text-3xl font-semibold mb-6">Transaction Details</h1>
       
       <div className="space-y-6">
         <Card>
@@ -76,15 +76,15 @@ const TransactionDetail = () => {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              <div className="flex justify-between">
+              <div className="flex flex-col md:flex-row justify-between">
                 <span className="font-medium">Customer Name:</span>
                 <span>{transaction.customer_name}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex flex-col md:flex-row justify-between">
                 <span className="font-medium">Mobile Number:</span>
                 <span>{transaction.customer_mobile}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex flex-col md:flex-row justify-between">
                 <span className="font-medium">Transaction Date:</span>
                 <span>{format(new Date(transaction.created_at), 'PPpp')}</span>
               </div>
@@ -100,7 +100,7 @@ const TransactionDetail = () => {
             <div className="space-y-4">
               {transaction.transaction_items?.map((item: any) => (
                 <div key={item.id} className="border-b pb-4 last:border-0">
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col md:flex-row justify-between items-start gap-2">
                     <div>
                       <p className="font-medium">{item.services?.name}</p>
                       <p className="text-sm text-gray-500">
@@ -125,16 +125,16 @@ const TransactionDetail = () => {
             <CardTitle>Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between text-lg">
+            <div className="space-y-3">
+              <div className="flex justify-between text-base md:text-lg">
                 <span>Subtotal:</span>
                 <span>${transaction.total_amount - transaction.total_tips}</span>
               </div>
-              <div className="flex justify-between text-lg">
+              <div className="flex justify-between text-base md:text-lg">
                 <span>Total Tips:</span>
                 <span>${transaction.total_tips}</span>
               </div>
-              <div className="flex justify-between text-lg font-bold border-t pt-2">
+              <div className="flex justify-between text-lg md:text-xl font-bold border-t pt-3">
                 <span>Total Amount:</span>
                 <span>${transaction.total_amount}</span>
               </div>

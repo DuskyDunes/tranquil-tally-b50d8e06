@@ -62,30 +62,30 @@ const TransactionHistory = () => {
   });
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-semibold mb-8">Transaction History</h1>
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      <h1 className="text-2xl md:text-3xl font-semibold mb-6">Transaction History</h1>
 
-      <div className="flex gap-4 mb-8">
-        <div>
+      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="w-full sm:w-auto">
           <label className="block text-sm font-medium mb-1">Start Date</label>
           <DatePicker date={startDate} onSelect={setStartDate} />
         </div>
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-sm font-medium mb-1">End Date</label>
           <DatePicker date={endDate} onSelect={setEndDate} />
         </div>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center">
+        <div className="flex justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {transactions?.map((transaction) => (
             <Link key={transaction.id} to={`/transactions/${transaction.id}`}>
-              <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
-                <div className="flex justify-between items-start mb-4">
+              <Card className="p-4 md:p-6 hover:shadow-lg transition-shadow duration-200">
+                <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
                   <div>
                     <h3 className="text-lg font-semibold">{transaction.customer_name}</h3>
                     <p className="text-sm text-gray-500">{transaction.customer_mobile}</p>
@@ -101,17 +101,17 @@ const TransactionHistory = () => {
 
                 <div className="border-t pt-4">
                   <h4 className="font-medium mb-2">Services</h4>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {transaction.transaction_items?.map((item: any) => (
-                      <div key={item.id} className="flex justify-between items-center">
+                      <div key={item.id} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                         <div>
-                          <p>{item.services?.name}</p>
+                          <p className="font-medium">{item.services?.name}</p>
                           <p className="text-sm text-gray-500">
                             Staff: {item.profiles?.full_name || item.profiles?.email}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p>${item.price}</p>
+                          <p className="font-semibold">${item.price}</p>
                           {item.tip > 0 && (
                             <p className="text-sm text-gray-500">Tip: ${item.tip}</p>
                           )}
@@ -123,6 +123,9 @@ const TransactionHistory = () => {
               </Card>
             </Link>
           ))}
+          {(!transactions || transactions.length === 0) && (
+            <p className="text-center text-gray-500 py-8">No transactions found.</p>
+          )}
         </div>
       )}
     </div>

@@ -140,8 +140,8 @@ const Services = () => {
   }, {} as Record<string, typeof services>);
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <h1 className="text-2xl md:text-3xl font-semibold">Services</h1>
         {isAdmin && (
           <Dialog>
@@ -160,7 +160,7 @@ const Services = () => {
         )}
       </div>
       
-      <div className="space-y-4 md:space-y-6">
+      <div className="space-y-6">
         {Object.entries(servicesByCategory || {}).map(([category, services]) => (
           <ServiceCard
             key={category}
@@ -172,6 +172,9 @@ const Services = () => {
             isAdmin={isAdmin}
           />
         ))}
+        {(!servicesByCategory || Object.keys(servicesByCategory).length === 0) && (
+          <p className="text-center text-gray-500 py-8">No services available.</p>
+        )}
       </div>
     </div>
   );
