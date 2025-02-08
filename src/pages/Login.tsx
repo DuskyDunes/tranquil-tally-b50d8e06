@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -54,7 +53,7 @@ const Login = () => {
       <div className="w-full max-w-md animate-fadeIn">
         <Card className="p-8 bg-white shadow-lg rounded-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold text-gray-800 mb-2">Welcome Back</h1>
+            <h1 className="text-3xl font-semibold text-gray-800 mb-2">De Style Mens Saloon</h1>
             <p className="text-gray-600">Sign in to your account</p>
           </div>
           {isPendingApproval && (
