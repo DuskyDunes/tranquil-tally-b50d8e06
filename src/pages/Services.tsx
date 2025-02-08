@@ -59,10 +59,17 @@ const Services = () => {
     mutationFn: async (newService: any) => {
       if (!newService) throw new Error('Service data is required');
       
-      const { error } = await supabase
+      // Remove any undefined or empty id field
+      const { id, ...serviceData } = newService;
+      
+      const { data, error } = await supabase
         .from('services')
-        .insert([newService]);
+        .insert([serviceData])
+        .select()
+        .single();
+        
       if (error) throw error;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });

@@ -19,7 +19,6 @@ interface ServiceFormProps {
 
 export const ServiceForm = ({ initialData, categories, onSubmit, title }: ServiceFormProps) => {
   const [formData, setFormData] = useState({
-    id: initialData?.id || undefined,
     name: initialData?.name || "",
     price: initialData?.price || "",
     category_id: initialData?.category_id || "",
@@ -30,6 +29,12 @@ export const ServiceForm = ({ initialData, categories, onSubmit, title }: Servic
       ...formData,
       price: Number(formData.price),
     };
+
+    // Only include id in submitData if we're updating an existing service
+    if (initialData?.id) {
+      submitData.id = initialData.id;
+    }
+
     onSubmit(submitData);
   };
 
