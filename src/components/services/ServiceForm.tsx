@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,10 +19,19 @@ interface ServiceFormProps {
 
 export const ServiceForm = ({ initialData, categories, onSubmit, title }: ServiceFormProps) => {
   const [formData, setFormData] = useState({
+    id: initialData?.id || undefined,
     name: initialData?.name || "",
     price: initialData?.price || "",
     category_id: initialData?.category_id || "",
   });
+
+  const handleSubmit = () => {
+    const submitData = {
+      ...formData,
+      price: Number(formData.price),
+    };
+    onSubmit(submitData);
+  };
 
   return (
     <DialogContent className="sm:max-w-[425px]">
@@ -63,7 +73,7 @@ export const ServiceForm = ({ initialData, categories, onSubmit, title }: Servic
           </select>
         </div>
         <Button
-          onClick={() => onSubmit(formData)}
+          onClick={handleSubmit}
           disabled={!formData.name || !formData.price || !formData.category_id}
           className="w-full"
         >

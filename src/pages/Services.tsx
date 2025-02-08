@@ -17,16 +17,18 @@ const Services = () => {
   const { data: userProfile } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
+      if (!user?.id) return null;
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', user?.id)
+        .eq('id', user.id)
         .single();
       
       if (error) throw error;
       return data;
     },
-    enabled: !!user,
+    enabled: !!user?.id,
   });
 
   const isAdmin = userProfile?.role === 'admin';
@@ -55,6 +57,8 @@ const Services = () => {
 
   const addServiceMutation = useMutation({
     mutationFn: async (newService: any) => {
+      if (!newService) throw new Error('Service data is required');
+      
       const { error } = await supabase
         .from('services')
         .insert([newService]);
@@ -68,6 +72,7 @@ const Services = () => {
       });
     },
     onError: (error) => {
+      console.error('Add service error:', error);
       toast({
         title: "Error",
         description: "Failed to add service",
@@ -78,6 +83,8 @@ const Services = () => {
 
   const updateServiceMutation = useMutation({
     mutationFn: async (service: any) => {
+      if (!service?.id) throw new Error('Service ID is required');
+      
       const { error } = await supabase
         .from('services')
         .update({
@@ -96,6 +103,7 @@ const Services = () => {
       });
     },
     onError: (error) => {
+      console.error('Update service error:', error);
       toast({
         title: "Error",
         description: "Failed to update service",
@@ -106,6 +114,8 @@ const Services = () => {
 
   const deleteServiceMutation = useMutation({
     mutationFn: async (serviceId: string) => {
+      if (!serviceId) throw new Error('Service ID is required');
+      
       const { error } = await supabase
         .from('services')
         .delete()
@@ -120,6 +130,7 @@ const Services = () => {
       });
     },
     onError: (error) => {
+      console.error('Delete service error:', error);
       toast({
         title: "Error",
         description: "Failed to delete service",
