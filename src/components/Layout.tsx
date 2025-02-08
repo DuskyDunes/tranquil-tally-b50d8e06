@@ -1,4 +1,3 @@
-
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, Outlet } from 'react-router-dom';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -35,7 +34,7 @@ const Layout = () => {
             <SidebarGroup>
               <div className="px-4 py-6">
                 <h1 className="text-xl md:text-2xl font-semibold text-primary truncate">
-                  De Style Mens Saloon
+                  Welcome :)
                 </h1>
               </div>
               <SidebarGroupContent>
