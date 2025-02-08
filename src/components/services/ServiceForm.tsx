@@ -17,15 +17,26 @@ interface ServiceFormProps {
   title: string;
 }
 
+interface ServiceFormData {
+  name: string;
+  price: string | number;
+  category_id: string;
+}
+
+interface ServiceSubmitData extends ServiceFormData {
+  id?: string;
+  price: number;
+}
+
 export const ServiceForm = ({ initialData, categories, onSubmit, title }: ServiceFormProps) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ServiceFormData>({
     name: initialData?.name || "",
     price: initialData?.price || "",
     category_id: initialData?.category_id || "",
   });
 
   const handleSubmit = () => {
-    const submitData = {
+    const submitData: ServiceSubmitData = {
       ...formData,
       price: Number(formData.price),
     };
