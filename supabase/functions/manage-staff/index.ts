@@ -1,3 +1,4 @@
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
 const corsHeaders = {
@@ -89,12 +90,24 @@ Deno.serve(async (req) => {
       const { userId } = data
       console.log('Removing staff member:', userId)
 
-      // Delete the auth user (this will cascade to the profile due to foreign key)
+      // First delete the profile (this should cascade delete related records)
+      const { error: deleteProfileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId)
+
+      if (deleteProfileError) {
+        console.error('Error deleting profile:', deleteProfileError)
+        throw new Error(`Error deleting profile: ${deleteProfileError.message}`)
+      }
+
+      // Then delete the auth user
       const { error: deleteUserError } = await supabase.auth.admin.deleteUser(
         userId
       )
 
       if (deleteUserError) {
+        console.error('Error deleting auth user:', deleteUserError)
         throw new Error(`Error deleting user: ${deleteUserError.message}`)
       }
 
