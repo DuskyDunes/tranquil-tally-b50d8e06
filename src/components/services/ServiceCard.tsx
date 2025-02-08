@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -22,19 +23,22 @@ export const ServiceCard = ({
   isAdmin 
 }: ServiceCardProps) => {
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{category}</CardTitle>
+    <Card className="w-full overflow-hidden border-0 shadow-md">
+      <CardHeader className="bg-accent/30">
+        <CardTitle className="text-lg md:text-xl">{category}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <div className="grid gap-4">
           {services?.map((service) => (
-            <div key={service.id} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-4">
-              <span className="text-lg">{service.name}</span>
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4 w-full md:w-auto">
-                <span className="text-lg font-bold">${service.price}</span>
+            <div 
+              key={service.id} 
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-lg bg-white border shadow-sm hover:shadow-md transition-shadow duration-200"
+            >
+              <span className="text-base sm:text-lg font-medium text-gray-800">{service.name}</span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                <span className="text-lg font-bold text-primary">${service.price}</span>
                 {isAdmin && (
-                  <div className="flex gap-2 w-full md:w-auto">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="icon" className="h-8 w-8">

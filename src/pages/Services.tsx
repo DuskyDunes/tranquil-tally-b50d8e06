@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -127,8 +128,6 @@ const Services = () => {
     },
   });
 
-  if (isLoading) return <div>Loading...</div>;
-
   // Group services by category
   const servicesByCategory = services?.reduce((acc, service) => {
     const categoryName = service.categories?.name || 'Uncategorized';
@@ -140,13 +139,13 @@ const Services = () => {
   }, {} as Record<string, typeof services>);
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+    <div className="animate-fadeIn space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl md:text-3xl font-semibold">Services</h1>
         {isAdmin && (
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="w-full md:w-auto">
+              <Button className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Service
               </Button>
@@ -160,7 +159,7 @@ const Services = () => {
         )}
       </div>
       
-      <div className="space-y-6">
+      <div className="grid gap-6">
         {Object.entries(servicesByCategory || {}).map(([category, services]) => (
           <ServiceCard
             key={category}

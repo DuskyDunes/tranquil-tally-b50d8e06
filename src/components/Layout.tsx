@@ -29,19 +29,21 @@ const Layout = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-secondary">
+      <div className="min-h-screen flex w-full bg-gray-50">
         <Sidebar className="hidden md:block">
           <SidebarContent>
             <SidebarGroup>
               <div className="px-4 py-6">
-                <h1 className="text-xl md:text-2xl font-semibold text-primary truncate">De Style Mens Saloon</h1>
+                <h1 className="text-xl md:text-2xl font-semibold text-primary truncate">
+                  De Style Mens Saloon
+                </h1>
               </div>
               <SidebarGroupContent>
                 {menuItems.map((item) => (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       onClick={() => navigate(item.path)}
-                      className="flex items-center gap-3 px-4 py-2 hover:bg-accent rounded-lg transition-all duration-300 w-full"
+                      className="flex items-center gap-3 px-4 py-2.5 hover:bg-accent rounded-lg transition-all duration-300 w-full"
                     >
                       <item.icon className="w-5 h-5 shrink-0" />
                       <span className="truncate">{item.label}</span>
@@ -51,7 +53,7 @@ const Layout = () => {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 w-full"
+                    className="flex items-center gap-3 px-4 py-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300 w-full"
                   >
                     <LogOut className="w-5 h-5 shrink-0" />
                     <span>Logout</span>
@@ -63,23 +65,25 @@ const Layout = () => {
         </Sidebar>
 
         {/* Mobile Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-50">
-          <div className="flex justify-around items-center p-3">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-50 shadow-lg">
+          <div className="flex justify-around items-center p-2">
             {menuItems.map((item) => (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className="flex flex-col items-center gap-1"
+                className="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors"
               >
                 <item.icon className="w-5 h-5" />
-                <span className="text-xs">{item.label}</span>
+                <span className="text-xs font-medium">{item.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        <main className="flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-auto">
-          <Outlet />
+        <main className="flex-1 px-4 py-6 md:p-8 pb-24 md:pb-8 overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </SidebarProvider>
