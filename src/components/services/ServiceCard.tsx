@@ -2,8 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react";
 import { ServiceForm } from "./ServiceForm";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface ServiceCardProps {
   category: string;
@@ -22,12 +24,32 @@ export const ServiceCard = ({
   onDelete,
   isAdmin 
 }: ServiceCardProps) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
   return (
-    <Card className="w-full overflow-hidden border-0 shadow-md">
-      <CardHeader className="bg-accent/30">
-        <CardTitle className="text-lg md:text-xl">{category}</CardTitle>
+    <Card className="w-full overflow-hidden border-0 shadow-md transition-all duration-300">
+      <CardHeader 
+        className={cn(
+          "bg-accent/30 cursor-pointer transition-all duration-300",
+          !isExpanded && "rounded-b-lg"
+        )}
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg md:text-xl">{category}</CardTitle>
+          {isExpanded ? (
+            <ChevronUp className="h-5 w-5 text-gray-500" />
+          ) : (
+            <ChevronDown className="h-5 w-5 text-gray-500" />
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent 
+        className={cn(
+          "transition-all duration-300 ease-in-out",
+          isExpanded ? "p-6 max-h-[1000px] opacity-100" : "p-0 max-h-0 opacity-0 overflow-hidden"
+        )}
+      >
         <div className="grid gap-4">
           {services?.map((service) => (
             <div 

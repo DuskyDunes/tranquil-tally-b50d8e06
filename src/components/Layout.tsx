@@ -1,3 +1,4 @@
+
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate, Outlet } from 'react-router-dom';
 import { SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -70,10 +71,10 @@ const Layout = () => {
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors"
+                className="flex flex-col items-center p-2 rounded-lg transition-colors"
+                title={item.label}
               >
-                <item.icon className="w-5 h-5" />
-                <span className="text-xs font-medium">{item.label}</span>
+                <item.icon className="w-6 h-6" />
               </button>
             ))}
           </div>
