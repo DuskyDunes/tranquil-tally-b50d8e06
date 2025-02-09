@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -204,9 +205,9 @@ const NewSale = () => {
       <h1 className="text-3xl font-semibold mb-8">New Sale</h1>
       
       <Card className="p-6 mb-6">
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
-            <label className="text-sm font-medium text-gray-700">Customer Name</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Customer Name</label>
             <Input
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
@@ -215,7 +216,7 @@ const NewSale = () => {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-gray-700">Mobile Number</label>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Mobile Number</label>
             <Input
               value={customerMobile}
               onChange={(e) => setCustomerMobile(e.target.value)}
@@ -228,103 +229,112 @@ const NewSale = () => {
         <div className="space-y-6">
           {selectedItems.map((item, index) => (
             <div key={item.id} className="flex gap-4 items-start p-4 bg-white rounded-lg shadow-sm">
-              <div className="grid grid-cols-6 gap-4 flex-1">
-                <div className="col-span-1">
-                  <Select
-                    value={item.category}
-                    onValueChange={(value) => updateItem(index, 'category', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="col-span-1">
-                  <Select
-                    value={item.serviceId}
-                    onValueChange={(value) => updateItem(index, 'service', value)}
-                    disabled={!item.category}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select service" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {services
-                        .filter(service => service.category_id === item.category)
-                        .map((service) => (
-                          <SelectItem key={service.id} value={service.id}>
-                            {service.name} - ${service.price}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Category</label>
+                    <Select
+                      value={item.category}
+                      onValueChange={(value) => updateItem(index, 'category', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
                           </SelectItem>
                         ))}
-                    </SelectContent>
-                  </Select>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Service</label>
+                    <Select
+                      value={item.serviceId}
+                      onValueChange={(value) => updateItem(index, 'service', value)}
+                      disabled={!item.category}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select service" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {services
+                          .filter(service => service.category_id === item.category)
+                          .map((service) => (
+                            <SelectItem key={service.id} value={service.id}>
+                              {service.name} - ${service.price}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <div className="col-span-1">
-                  <Input
-                    type="number"
-                    placeholder="Price"
-                    value={item.price}
-                    onChange={(e) => updateItem(index, 'price', Number(e.target.value))}
-                    min="0"
-                    step="0.01"
-                    className="w-full"
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Staff</label>
+                    <Select
+                      value={item.staff}
+                      onValueChange={(value) => updateItem(index, 'staff', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select staff" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {staff.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.full_name || s.email}
+                          </SelectItem>
+                        ))}
+                        {staff.length === 0 && (
+                          <SelectItem value="none" disabled>
+                            No staff members available
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Price ($)</label>
+                    <Input
+                      type="number"
+                      placeholder="Enter price"
+                      value={item.price}
+                      onChange={(e) => updateItem(index, 'price', Number(e.target.value))}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
 
-                <div className="col-span-1">
-                  <Select
-                    value={item.staff}
-                    onValueChange={(value) => updateItem(index, 'staff', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Staff" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {staff.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.full_name || s.email}
-                        </SelectItem>
-                      ))}
-                      {staff.length === 0 && (
-                        <SelectItem value="none" disabled>
-                          No staff members available
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Tip ($)</label>
+                    <Input
+                      type="number"
+                      placeholder="Enter tip"
+                      value={item.tip || ''}
+                      onChange={(e) => updateItem(index, 'tip', Number(e.target.value))}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
 
-                <div className="col-span-1">
-                  <Input
-                    type="number"
-                    placeholder="Tip"
-                    value={item.tip || ''}
-                    onChange={(e) => updateItem(index, 'tip', Number(e.target.value))}
-                    min="0"
-                    step="0.01"
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="col-span-1 flex items-center justify-between">
-                  <span className="font-medium">${Number(item.price) + (item.tip || 0)}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeItem(index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center justify-between pt-6">
+                    <span className="font-medium text-lg">Total: ${Number(item.price) + (item.tip || 0)}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeItem(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
